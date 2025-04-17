@@ -1,6 +1,7 @@
 package com.example.openaiproject;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -25,13 +26,16 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+import com.example.openaiproject.BuildConfig;
+
+
 public class MainActivity extends AppCompatActivity {
 
     private EditText promptInput;
     private Button sendButton;
     private TextView responseOutput;
 
-    private final String openAIKey = "Bearer YOUR_OPENAI_API_KEY_HERE";
+    private final String openAIKey = "Bearer " + BuildConfig.OPENAI_API_KEY;
     private final OkHttpClient client = new OkHttpClient();
 
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -88,16 +92,26 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.body() != null) {
+                    String responseBody = response.body().string();
+                    Log.d("OPENAI_RAW_RESPONSE", responseBody); // <-- Add this line
                     try {
-                        String responseBody = response.body().string();
                         JSONObject jsonResponse = new JSONObject(responseBody);
-                        String message = jsonResponse
-                                .getJSONArray("choices")
-                                .getJSONObject(0)
-                                .getJSONObject("message")
-                                .getString("content");
 
-                        runOnUiThread(() -> responseOutput.setText(message.trim()));
+                        if (jsonResponse.has("choices")) {
+                            String message = jsonResponse
+                                    .getJSONArray("choices")
+                                    .getJSONObject(0)
+                                    .getJSONObject("message")
+                                    .getString("content");
+
+                            runOnUiThread(() -> responseOutput.setText(message.trim()));
+                        } else if (jsonResponse.has("error")) {
+                            String errorMsg = jsonResponse.getJSONObject("error").getString("message");
+                            runOnUiThread(() -> responseOutput.setText("API Error: " + errorMsg));
+                        } else {
+                            runOnUiThread(() -> responseOutput.setText("Unexpected response format"));
+                        }
+
                     } catch (JSONException e) {
                         runOnUiThread(() -> responseOutput.setText("Parsing error: " + e.getMessage()));
                     }

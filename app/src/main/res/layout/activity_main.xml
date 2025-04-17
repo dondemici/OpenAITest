@@ -27,5 +27,6 @@
         android:padding="8dp"
         android:background="#EEEEEE"
         android:text="Response will appear here..."
-        android:scrollbars="vertical"/>
+        android:scrollbars="vertical"
+        android:textIsSelectable="true"/>
 </LinearLayout>

@@ -16,8 +16,16 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    buildFeatures {
+        buildConfig = true // ✅ enable custom BuildConfig fields
+    }
+
     buildTypes {
-        release {
+        getByName("debug") {
+            buildConfigField("String", "OPENAI_API_KEY", "\"${project.findProperty("openai.api.key") ?: ""}\"")
+        }
+        getByName("release") {
+            buildConfigField("String", "OPENAI_API_KEY", "\"${project.findProperty("openai.api.key") ?: ""}\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -29,6 +37,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
+
+
 }
 
 dependencies {
