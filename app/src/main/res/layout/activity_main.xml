@@ -10,7 +10,13 @@
         android:id="@+id/promptInput"
         android:layout_width="379dp"
         android:layout_height="wrap_content"
-        android:hint="Enter your prompt" />
+        android:hint="Enter your prompt"
+        android:inputType="textMultiLine"
+        android:minLines="3"
+        android:maxLines="6"
+        android:gravity="top"
+        android:scrollbars="vertical"
+        android:overScrollMode="always"/>
 
     <Button
         android:id="@+id/sendButton"

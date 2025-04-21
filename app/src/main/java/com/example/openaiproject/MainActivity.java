@@ -30,25 +30,19 @@ import com.example.openaiproject.BuildConfig;
 
 
 public class MainActivity extends AppCompatActivity {
-
     private EditText promptInput;
     private Button sendButton;
     private TextView responseOutput;
-
     private final String openAIKey = "Bearer " + BuildConfig.OPENAI_API_KEY;
     private final OkHttpClient client = new OkHttpClient();
-
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         promptInput = findViewById(R.id.promptInput);
         sendButton = findViewById(R.id.sendButton);
         responseOutput = findViewById(R.id.responseOutput);
-
         sendButton.setOnClickListener(view -> {
             String prompt = promptInput.getText().toString().trim();
             if (!prompt.isEmpty()) {
@@ -56,7 +50,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
     private void sendPromptToOpenAI(String prompt) {
         JSONObject jsonBody = new JSONObject();
         try {
@@ -67,28 +60,22 @@ public class MainActivity extends AppCompatActivity {
             userMessage.put("role", "user");
             userMessage.put("content", prompt);
             messages.put(userMessage);
-
             jsonBody.put("messages", messages);
-
         } catch (JSONException e) {
             e.printStackTrace();
             return;
         }
-
         RequestBody body = RequestBody.create(JSON, jsonBody.toString());
-
         Request request = new Request.Builder()
                 .url("https://api.openai.com/v1/chat/completions")
                 .header("Authorization", openAIKey)
                 .post(body)
                 .build();
-
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 runOnUiThread(() -> responseOutput.setText("Error: " + e.getMessage()));
             }
-
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.body() != null) {
@@ -96,14 +83,12 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("OPENAI_RAW_RESPONSE", responseBody); // <-- Add this line
                     try {
                         JSONObject jsonResponse = new JSONObject(responseBody);
-
                         if (jsonResponse.has("choices")) {
                             String message = jsonResponse
                                     .getJSONArray("choices")
                                     .getJSONObject(0)
                                     .getJSONObject("message")
                                     .getString("content");
-
                             runOnUiThread(() -> responseOutput.setText(message.trim()));
                         } else if (jsonResponse.has("error")) {
                             String errorMsg = jsonResponse.getJSONObject("error").getString("message");
@@ -111,7 +96,6 @@ public class MainActivity extends AppCompatActivity {
                         } else {
                             runOnUiThread(() -> responseOutput.setText("Unexpected response format"));
                         }
-
                     } catch (JSONException e) {
                         runOnUiThread(() -> responseOutput.setText("Parsing error: " + e.getMessage()));
                     }
